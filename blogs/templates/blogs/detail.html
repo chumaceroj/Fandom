@@ -1,0 +1,24 @@
+<h2>{{ blog.title }}</h2>
+<p>By: {{ blog.get_display_author }}</p>
+<p>{{ blog.content }}</p>
+<p>Posted: {{ blog.created_at }}</p>
+
+{% if not blog.is_orphaned and blog.author == request.user %}
+    <a href="{% url 'edit_blog' blog.id %}">Edit</a>
+
+    <form method="post" action="{% url 'anonymize_blog' blog.id %}">
+        {% csrf_token %}
+        {% if blog.is_anonymous %}
+            <button type="submit">Reveal identity</button>
+        {% else %}
+            <button type="submit">Go anonymous</button>
+        {% endif %}
+    </form>
+
+    <form method="post" action="{% url 'orphan_blog' blog.id %}">
+        {% csrf_token %}
+        <button type="submit">Orphan this blog</button>
+    </form>
+{% endif %}
+
+<a href="{% url 'index' %}">Back to all blogs</a>

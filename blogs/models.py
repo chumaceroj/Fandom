@@ -18,7 +18,41 @@ class Blog(models.Model):
     is_anonymous = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.title} by {self.author}"
+        return f"{self.title} by {self.get_display_author()}"
+    
+    def orphan(self):
+        """Permanently remove the author link, but the content stays posted"""
+        self.author = None
+        self.is_orphaned = True
+        self.save() # saves the changes to the database
+
+    def can_edit(self):
+        """Checks if the blog can still be edited"""
+        if self.is_orphaned:
+            return False
+        return True
+    
+    def anonymize(self):
+        """Hide author from public but keep the link in the database"""
+        self.is_anonymous = True
+        self.save()
+
+    def deanonymize(self):
+        """Reveal author again"""
+        self.is_anonymous = False
+        self.save()
+    
+    def get_display_author(self):
+        """Returns the name to display publicly"""
+        if self.is_orphaned:
+            return "orphan_account"
+        if self.is_anonymous:
+            return "Anonymous"
+        if self.author is None: # only reaches if is_orphaned is False
+            return "deleted_user"
+        return self.author.username
+    
+
     
 class Comment(models.Model):
     # Links comment to specific Blog post (one-way connection)

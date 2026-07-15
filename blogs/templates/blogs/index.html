@@ -1,0 +1,7 @@
+<h1>All Blogs</h1>
+{% for blog in blogs %}
+    <h2>{{ blog.title }}</h2>
+    <p>By: {{ blog.author }}</p>
+    <p>{{ blog.content }}</p>
+{% endfor %}
+

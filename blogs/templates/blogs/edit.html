@@ -1,0 +1,12 @@
+<h2>Edit: {{ blog.title }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Title:</label><br>
+    <input type="text" name="title" value="{{ blog.title }}"><br><br>
+    <label>Content:</label><br>
+    <textarea name="content" rows="10" cols="50">{{ blog.content }}</textarea><br><br>
+    <button type="submit">Save changes</button>
+</form>
+
+<a href="{% url 'blog_detail' blog.id %}">Cancel</a>
