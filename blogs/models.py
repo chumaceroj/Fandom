@@ -69,3 +69,30 @@ class Comment(models.Model):
     
     def __str__(self):
         return f"Comment by {self.author} at {self.created_at} on {self.blog.title}"
+    
+    def orphan(self):
+        self.author = None
+        self.is_orphaned = True
+        self.save()
+
+    def can_edit(self):
+        if self.is_orphaned:
+            return False
+        return True
+    
+    def anonymize(self):
+        self.is_anonymous = True
+        self.save()
+
+    def deanonymize(self):
+        self.is_anonymous = False
+        self.save()
+
+    def get_display_author(self):
+        if self.is_orphaned:
+            return "orphan_account"
+        if self.is_anonymous:
+            return "Anonymous"
+        if self.author is None:
+            return "deleted_user"
+        return self.author.username

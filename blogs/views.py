@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Blog
+from .models import Blog, Comment
 
 
 # Create your views here.
@@ -67,6 +67,16 @@ def anonymize_blog(request, blog_id):
                 blog.anonymize()
     return redirect('blog_detail', blog_id=blog_id)
             
+def add_comment(request, blog_id):
+    if request.method == 'POST':
+        blog = get_object_or_404(Blog, id=blog_id)
+        content = request.POST.get('content')
         
+        Comment.objects.create(
+            blog=blog,
+            author=request.user if request.user.is_authenticated else None,
+            content=content
+        )
+    return redirect('blog_detail', blog_id=blog_id)
 
         

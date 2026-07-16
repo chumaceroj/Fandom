@@ -14,4 +14,5 @@ urlpatterns = [
     # /blogs/3/orphan/ → orphan blog with id=3
     path('<int:blog_id>/orphan/', views.orphan_blog, name='orphan_blog'),
     path('<int:blog_id>/anonymize/', views.anonymize_blog, name='anonymize_blog'),
+    path('<int:blog_id>/comment/', views.add_comment, name='add_comment'),
 ]

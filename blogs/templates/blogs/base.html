@@ -1,0 +1,106 @@
+<!-- type declaration (html) -->
+<!DOCTYPE html>
+<!-- root/start element (everything inside) -->
+<html lang="en">
+<!-- invisible data (not viewable/just for style) -->
+
+<head>
+    <!-- character encording w/ out error -->
+    <meta charset="UTF-8">
+    <title>FanVerse</title>
+
+    <!-- sets style of the entire page (font, background, text color, margins) -->
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            background-color: blanchedalmond;
+            margin: 0;
+            color: midnightblue;
+        }
+
+        /* sets the style of the top navigation bar (8px system for padding) */
+        .navigation-bar {
+            background-color: midnightblue;
+            color: white;
+            padding: 16px 32px;
+            /* arranges/organizes items in navigation bar */
+            display: flex;
+            /* moves items to opposite sides of a container and distributes remaining space */
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navigation-bar .title {
+            font-size: large;
+            font-weight: bold;
+            letter-spacing: normal;
+        }
+
+        /* only change the links/buttons in the navigation bar (Profile & Logout) */
+        .navigation-bar .navigation-links a {
+            color: blanchedalmond;
+            /* overrides browsers default styling for links (underlined & blue) */
+            text-decoration: none;
+            margin-left: 24px;
+        }
+
+        /* middle container for blogs */
+        .main-container {
+            max-width: 800px;
+            /* automatic horizontal center */
+            margin: 32px auto;
+            padding: 0 16px;
+        }
+
+        .blog-card,
+        .comment-card {
+            background-color: white;
+            padding: 24px;
+            /* round corners */
+            border-radius: 8px;
+            /* space before the next card */
+            margin-bottom: 24px;
+            border: 1px solid midnightblue;
+        }
+
+        /* style of buttons */
+        .button {
+            /* look at parent container */
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid midnightblue;
+            background-color: white;
+            color: midnightblue;
+            /* changes cursor if container is clickable */
+            cursor: pointer;
+            /* spacing between inline buttons */
+            margin-right: 8px;
+        }
+
+        .button:hover {
+            background-color: aliceblue;
+        }
+    </style>
+</head>
+
+<!-- viewable content (building the containers) -->
+
+<body>
+    <div class="navigation-bar">
+        <div class="title">FanVerse</div>
+        <div class="navigation-links">
+            <!-- clickable links for Profile & Logout -->
+            <a href="#">My Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </div>
+    <!-- container for blogs (<div> can't perform actions/logic) -->
+    {% block content %}
+    {% endblock %}
+
+</body>
+
+</html>
