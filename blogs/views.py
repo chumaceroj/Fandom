@@ -68,15 +68,23 @@ def anonymize_blog(request, blog_id):
     return redirect('blog_detail', blog_id=blog_id)
             
 def add_comment(request, blog_id):
+    # if the user just submitted a post request
     if request.method == 'POST':
+        # get the specific blog post using its ID/return a 404 page if it doesn't exist
         blog = get_object_or_404(Blog, id=blog_id)
-        content = request.POST.get('content')
+        # if the user is logged in, grab the content they submitted on the form
+        if request.user.is_authenticated:
+            content = request.POST.get('content')
         
+        #create a new comment and save it to the database
         Comment.objects.create(
-            blog=blog,
-            author=request.user if request.user.is_authenticated else None,
-            content=content
+            #link it to the blog object
+            blog = blog,
+            author = request.user,
+            # save the text the user submitted
+            content = content
         )
+    # redirect browser to the blog page & show the new comment
     return redirect('blog_detail', blog_id=blog_id)
 
         

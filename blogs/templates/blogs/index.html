@@ -1,23 +1,36 @@
+<!-- Homepage that lists all blogs -->
+
+<!-- inherit the style/layout of main page (copies base.html's outer skeleton) -->
 {% extends 'blogs/base.html' %}
+<!-- start the content block that goes into base.html -->
 {% block content %}
+
+<!-- start container that holds all blog cards -->
 <div class="main-container">
+    <!-- main header ("All Blogs") -->
     <h1 style="color: midnightblue; margin-bottom: 24px;">All Blogs</h1>
 
     {% for blog in blogs %}
+    <!-- create a blog card within the main container for each blog (sent from views.py) -->
     <div class="blog-card">
+        <!-- create a clickable link (for the corresponding blog detail page) using the blog ID; paste title as link into header -->
         <h2>
             <a href="{% url 'blog_detail' blog.id %}" style="color: midnightblue; text-decoration: none;">
                 {{ blog.title }}
             </a>
         </h2>
+        <!-- display author's name using function in models.py -->
         <p>By: {{ blog.get_display_author }}</p>
-        <p>{{ blog.content|truncatewords:30 }}</p>
+        <!-- display preview of blog content (first 50 words) -->
+        <p>{{ blog.content|truncatewords:50 }}</p>
 
+        <!-- create a "Read More" button that redirects to the blog's detail page -->
         <a href="{% url 'blog_detail' blog.id %}" class="button"
             style="text-decoration: none; display: inline-block; margin-top: 8px;">
             Read More & View Comments
         </a>
     </div>
+    <!-- displays "No blogs found" message if database is empty -->
     {% empty %}
     <p>No blogs found.</p>
     {% endfor %}

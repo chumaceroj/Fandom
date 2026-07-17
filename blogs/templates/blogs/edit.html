@@ -1,18 +1,28 @@
-{% extends 'blogs/base.html' %}
+<!-- Form for editing a blog -->
 
+{% extends 'blogs/base.html' %}
 {% block content %}
+
+<!-- uses the main container to keep style consistent -->
 <div class="main-container">
 
     <h2>Edit: {{ blog.title }}</h2>
+    <!-- create a form to send the edited data to the same url -->
     <form method="post">
         {% csrf_token %}
-        <label>Title:</label><br>
+        <label>Title:</label>
+        <br>
+        <!-- text input box that display's the blog's current title -->
         <input type="text" name="title" value="{{ blog.title }}"><br><br>
-        <label>Content:</label><br>
+        <label>Content:</label>
+        <br>
+        <!-- text input box that display's the blog's current content -->
         <textarea name="content" rows="10" cols="50">{{ blog.content }}</textarea><br><br>
+        <!-- "Save changes" button to send modifications to views.py (saves to database) -->
         <button type="submit">Save changes</button>
     </form>
 
+    <!-- create a "Cancel" button that returns to the blog's detail page (without saving changes) -->
     <a href="{% url 'blog_detail' blog.id %}">Cancel</a>
 </div>
 {% endblock %}

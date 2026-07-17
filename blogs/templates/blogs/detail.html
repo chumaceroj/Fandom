@@ -1,15 +1,23 @@
+<!-- Blog detail page (wtih comments) -->
+
 {% extends 'blogs/base.html' %}
 {% block content %}
+
+<!-- create main container for single blog post -->
 <div class="main-container">
+    <!-- display the blogs title, author, full text, and when it was created -->
     <h2>{{ blog.title }}</h2>
     <p>By: {{ blog.get_display_author }}</p>
     <p>{{ blog.content }}</p>
     <p>Posted: {{ blog.created_at }}</p>
 
+    <!-- if the blog isn't orphanes and the logged in user is the owner, create an edit button that redirects to the edit form -->
     {% if not blog.is_orphaned and blog.author == request.user %}
     <a href="{% url 'edit_blog' blog.id %}">Edit</a>
 
+    <!-- create a form to send a anonymization request -->
     <form method="post" action="{% url 'anonymize_blog' blog.id %}">
+        <!-- ensures all requests are coming from our site (Django security key) -->
         {% csrf_token %}
         {% if blog.is_anonymous %}
         <button type="submit">Reveal identity</button>
@@ -18,40 +26,52 @@
         {% endif %}
     </form>
 
+    <!-- create a form to request orphaning -->
     <form method="post" action="{% url 'orphan_blog' blog.id %}">
         {% csrf_token %}
         <button type="submit">Orphan this blog</button>
     </form>
+    <!-- End the author edit permission check (orphaned blog can't be edited) -->
     {% endif %}
+    <!-- header for comment section -->
     <h3 style="color: midnightblue; margin-top: 32px;">Comments</h3>
 
+    <!-- if the user is logged in, create a container for the comment (labelled "Add a Comment") -->
     {% if user.is_authenticated %}
     <div class="comment-card" style="margin-top: 24px;">
         <h4 style="margin: 0 0 12px 0; color: midnightblue;">Add a Comment</h4>
+        <!-- create a form to send a post request with the new comment -->
         <form method="post" action="{% url 'add_comment' blog.id %}">
             {% csrf_token %}
+            <!-- input box for writing comment and submit button to send the form data -->
             <textarea name="content" rows="4"
                 style="width: 100%; border-radius: 8px; border: 1px solid midnightblue; padding: 8px;"
                 placeholder="What do you think?..." required></textarea>
-            <br><br>
+            <br>
+            <br>
             <button type="submit" class="button">Post Comment</button>
         </form>
     </div>
     {% else %}
+    <!-- if the user is not logged in, tell them to log in -->
     <p style="font-style: italic; color: midnightblue;">Please log in to leave a comment.</p>
     {%endif %}
 
+    <!-- create a comment card for all the comments related to this post -->
     {% for comment in blog.comments.all %}
     <div class="comment-card">
+        <!-- include the authors name, the comment, and the date -->
         <p><strong>{{ comment.get_display_author }}</strong> said:</p>
         <p>{{ comment.content }}</p>
         <p><small>{{ comment.created_at }}</small></p>
     </div>
+    <!-- if a blog has zero comments, display "No comments yet" -->
     {% empty %}
     <p style="color: midnightblue; font-style: italic;">No comments yet.</p>
     {% endfor %}
 
 
+    <!-- create a link to go back to the previous page -->
     <a href="{% url 'index' %}">Back to all blogs</a>
 </div>
 {% endblock %}
