@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Blog, Comment
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -18,7 +19,8 @@ def blog_detail(request, blog_id):
     # with the blog_id coming from the URL
     blog = get_object_or_404(Blog, id = blog_id)
     # sends the blog to the HTML template
-    return render(request, 'blogs/detail.html', {'blog': blog })
+    return render(request, 'blogs/detail.html', {'blog': blog})
+
 def edit_blog(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id) # finds the blog in the database
     # only the author can edit, and only if not orphaned
@@ -65,6 +67,21 @@ def anonymize_blog(request, blog_id):
                 blog.deanonymize()
             else:
                 blog.anonymize()
+    return redirect('blog_detail', blog_id=blog_id)
+
+def transfer_blog(request, blog_id):
+    if request.method == 'POST':
+        blog = get_object_or_404(Blog, id=blog_id)
+        if blog.author == request.user:
+            # Get the username they typed in
+            username = request.POST.get('new_owner_username')
+            try:
+                # Try to find that user
+                new_owner = User.objects.get(username=username)
+                blog.transfer(new_owner)
+            except User.DoesNotExist:
+                # Username doesn't exist — just redirect back
+                pass
     return redirect('blog_detail', blog_id=blog_id)
             
 def add_comment(request, blog_id):

@@ -15,4 +15,5 @@ urlpatterns = [
     path('<int:blog_id>/orphan/', views.orphan_blog, name='orphan_blog'),
     path('<int:blog_id>/anonymize/', views.anonymize_blog, name='anonymize_blog'),
     path('<int:blog_id>/comment/', views.add_comment, name='add_comment'),
+    path('<int:blog_id>/transfer/', views.transfer_blog, name='transfer_blog'),
 ]

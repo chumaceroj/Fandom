@@ -25,6 +25,13 @@
         <button type="submit">Go anonymous</button>
         {% endif %}
     </form>
+    
+    <!-- create a form to request transfer -->
+    <form method="post" action="{% url 'transfer_blog' blog.id %}">
+        {% csrf_token %}
+        <input type="text" name="new_owner_username" placeholder="Enter username to transfer to">
+        <button type="submit">Transfer</button>
+    </form>
 
     <!-- create a form to request orphaning -->
     <form method="post" action="{% url 'orphan_blog' blog.id %}">

@@ -41,7 +41,12 @@ class Blog(models.Model):
         """Reveal author again"""
         self.is_anonymous = False
         self.save()
-    
+
+    def transfer(self, new_owner):
+        """Transfer blog ownership to another user"""
+        self.author = new_owner
+        self.save()
+        
     def get_display_author(self):
         """Returns the name to display publicly"""
         if self.is_orphaned:
