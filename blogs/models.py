@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
 
 class Blog(models.Model):
     title = models.CharField(max_length=200)
@@ -56,7 +55,6 @@ class Blog(models.Model):
         if self.author is None: # only reaches if is_orphaned is False
             return "deleted_user"
         return self.author.username
-    
 
     
 class Comment(models.Model):
