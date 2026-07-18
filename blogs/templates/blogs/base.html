@@ -36,6 +36,12 @@
             letter-spacing: normal;
         }
 
+        /* sets style for FanVerse link in navigation bar */
+        .navigation-bar .title a {
+            color: white;
+            text-decoration: none;
+        }
+
         /* only change the links/buttons in the navigation bar (Profile & Logout) */
         .navigation-bar .navigation-links a {
             color: blanchedalmond;
@@ -83,6 +89,41 @@
         .button:hover {
             background-color: aliceblue;
         }
+
+        /* style for big buttons */
+        .button-large {
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid midnightblue;
+            background-color: white;
+            color: midnightblue;
+            cursor: pointer;
+            margin-top: 8px;
+            margin-right: 8px;
+        }
+
+        .button-large:hover {
+            background-color: aliceblue;
+        }
+
+        /* style for warning notices (anonymization & orphaning) */
+        .warning-notice {
+            color: crimson;
+            font-weight: bold;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* making all links same style as site */
+        .midnight-link {
+            color: midnightblue;
+            font-weight: bold;
+            font-size: 18px;
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -90,11 +131,16 @@
 
 <body>
     <div class="navigation-bar">
-        <div class="title">FanVerse</div>
+        <div class="title"><a href="{% url 'index' %}">FanVerse</a></div>
         <div class="navigation-links">
-            <!-- clickable links for Profile & Logout -->
+            <!-- clickable links for Profile, Login, Create User, & Logout -->
+            {% if user.is_authenticated %}
             <a href="#">My Profile</a>
-            <a href="#">Logout</a>
+            <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Create User</a>
+            {% endif %}
         </div>
     </div>
     <!-- container for blogs (<div> can't perform actions/logic) -->

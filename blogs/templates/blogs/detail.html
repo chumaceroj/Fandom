@@ -13,34 +13,52 @@
 
     <!-- if the blog isn't orphaned and the logged in user is the owner, create an edit button that redirects to the edit form -->
     {% if not blog.is_orphaned and blog.author == request.user %}
-    <a href="{% url 'edit_blog' blog.id %}">Edit</a>
+    <div class="blog-card" style="border-style: dashed; margin-top: 24px; margin-bottom: 32px;">
+        <!-- separate section for all buttons -->
+        <h3 style="margin: 0 0 8px 0; color: midnightblue; font-weight: bold; font-size: 1.35em;">Author Settings</h3>
+        <p style="margin-bottom: 20px; margin-top: 0;"><a href="{% url 'edit_blog' blog.id %}" class="midnight-link"
+                style="font-weight: normal; font-size: 1.05em; text-decoration: underline;">Edit Blog Post</a>
+        </p>
+        <!-- flexible container (needs to fit all items) -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- create a form to send a anonymization request -->
+            <form method="post" action="{% url 'anonymize_blog' blog.id %}" style="margin: 0;">
+                <!-- ensures all requests are coming from our site (Django security key) -->
+                {% csrf_token %}
+                {% if blog.is_anonymous %}
+                <!-- pop up warning after clicking "Go anonymous" -->
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Going anonymous hides your profile name from viewers. Do you want to continue?');">Reveal
+                    identity</button>
+                {% else %}
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Going anonymous hides your profile name from public viewers. Do you want to continue?');">Go
+                    anonymous</button>
+                {% endif %}
+            </form>
 
-    <!-- create a form to send a anonymization request -->
-    <form method="post" action="{% url 'anonymize_blog' blog.id %}">
-        <!-- ensures all requests are coming from our site (Django security key) -->
-        {% csrf_token %}
-        {% if blog.is_anonymous %}
-        <button type="submit">Reveal identity</button>
-        {% else %}
-        <button type="submit">Go anonymous</button>
-        {% endif %}
-    </form>
-    
-    <!-- create a form to request transfer -->
-    <form method="post" action="{% url 'transfer_blog' blog.id %}">
-        {% csrf_token %}
-        <input type="text" name="new_owner_username" placeholder="Enter username to transfer to">
-        <button type="submit">Transfer</button>
-    </form>
+            <!-- create a form to request transfer -->
+            <form method="post" action="{% url 'transfer_blog' blog.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <input type="text" name="new_owner_username" placeholder="Enter username to transfer to"
+                    style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; height: 34px; box-sizing: border-box; vertical-align: middle;">
+                <button type="submit" class="button" style="vertical-align: middle; height: 34px;"
+                    onclick="return confirm('Warning: Transferring ownership is permanent. You will lose ownership of this blog. Do you want to continue?');">Transfer</button>
+            </form>
 
-    <!-- create a form to request orphaning -->
-    <form method="post" action="{% url 'orphan_blog' blog.id %}">
-        {% csrf_token %}
-        <button type="submit">Orphan this blog</button>
-    </form>
-    <!-- End the author edit permission check (orphaned blog can't be edited) -->
-    {% endif %}
+            <!-- create a form to request orphaning-->
+            <form method="post" action="{% url 'orphan_blog' blog.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <!-- warning before orphaning -->
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Orphaning is permanent. You will lose ownership forever. Do you want to continue?');">Orphan
+                    this blog</button>
+            </form>
+        </div>
+    </div>
+
     <!-- header for comment section -->
+    {% endif %}
     <h3 style="color: midnightblue; margin-top: 32px;">Comments</h3>
 
     <!-- if the user is logged in, create a container for the comment (labelled "Add a Comment") -->
@@ -59,10 +77,6 @@
             <button type="submit" class="button">Post Comment</button>
         </form>
     </div>
-    {% else %}
-    <!-- if the user is not logged in, tell them to log in -->
-    <p style="font-style: italic; color: midnightblue;">Please log in to leave a comment.</p>
-    {% endif %}
 
     <!-- create a comment card for all the comments related to this post -->
     {% for comment in blog.comments.all %}
@@ -71,14 +85,45 @@
         <p><strong>{{ comment.get_display_author }}</strong> said:</p>
         <p>{{ comment.content }}</p>
         <p><small>{{ comment.created_at }}</small></p>
+
+        <!-- if the comment isn't orphaned and belongs to the user, display buttons-->
+        {% if not comment.is_orphaned and comment.author == request.user %}
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed midnightblue;">
+            <form method="post" action="{% url 'anonymize_comment' comment.id %}" style="display: inline-block;">
+                {% csrf_token %}
+                {% if comment.is_anonymous %}
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Comment anonymity hides your profile name. Do you want to reveal your identity?');">Reveal
+                    Comment Identity</button>
+                {% else %}
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Comment anonymity hides your profile name. Do you want to continue?');">Make
+                    Comment Anonymous</button>
+                {% endif %}
+            </form>
+
+            <form method="post" action="{% url 'orphan_comment' comment.id %}"
+                style="display: inline-block; margin-left: 16px;">
+                {% csrf_token %}
+                <button type="submit" class="button-large"
+                    onclick="return confirm('Warning: Comment orphaning is permanent. Do you want to continue?');">Orphan
+                    Comment</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     <!-- if a blog has zero comments, display "No comments yet" -->
     {% empty %}
     <p style="color: midnightblue; font-style: italic;">No comments yet.</p>
     {% endfor %}
 
+    <!-- if a user isn't logged in -->
+    {% else %}
+    <p style="font-style: italic; color: midnightblue;">Please log in to view or leave comments.</p>
+    {% endif %}
 
+    <br>
     <!-- create a link to go back to the previous page -->
-    <a href="{% url 'index' %}">Back to all blogs</a>
+    <a href="{% url 'index' %}" class="midnight-link">Back to all blogs</a>
 </div>
 {% endblock %}

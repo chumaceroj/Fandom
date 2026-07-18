@@ -1,0 +1,32 @@
+<!-- Registration Page -->
+
+{% extends 'blogs/base.html' %}
+{% block content %}
+
+<!-- keeping style consistent -->
+<div class="main-container">
+    <h2>Create New Account</h2>
+
+    <!-- error if username is already taken -->
+    {% if error %}
+    <p class="warning-notice">{{ error }}</p>
+    {% endif %}
+
+    <!-- create form to send user registration data -->
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <label>Choose Username:</label>
+        <br>
+        <!-- input boces for username and password -->
+        <input type="text" name="username" required
+            style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%;"><br><br>
+
+        <label>Choose Password:</label>
+        <br>
+        <input type="password" name="password" required
+            style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%;"><br><br>
+
+        <button type="submit" class="button">Register User</button>
+    </form>
+</div>
+{% endblock %}

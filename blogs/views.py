@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Blog, Comment
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 
 
 # Create your views here.
@@ -104,4 +105,58 @@ def add_comment(request, blog_id):
     # redirect browser to the blog page & show the new comment
     return redirect('blog_detail', blog_id=blog_id)
 
+def anonymize_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=comment_id)
         
+        if comment.author == request.user:
+            if comment.is_anonymous:
+                comment.deanonymize()
+            else:
+                comment.anonymize()
+        
+        return redirect('blog_detail', blog_id=comment.blog.id)
+    return redirect('index')
+
+        
+def orphan_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=comment_id)
+        
+        if comment.author == request.user:
+            comment.orphan()
+
+        return redirect('blog_detail', blog_id=comment.blog.id)
+    return redirect('index')
+
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('index')
+        else:
+            # if user enters the wrong information
+            return render(request, 'blogs/login.html', {'error': 'Invalid credentials. Re-enter your username and password.'})
+    return render(request, 'blogs/login.html')
+
+def logout_user(request):
+    logout(request)
+    return redirect('index')
+
+def register_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # checks that username doesn't already exist
+        if User.objects.filter(username=username).exists():
+            return render(request, 'blogs/register.html', {'error': 'Username already taken.'})
+        
+        user = User.objects.create_user(username=username, password=password)
+        login(request, user)
+        return redirect('index')
+    return render(request, 'blogs/register.html')

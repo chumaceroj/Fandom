@@ -1,0 +1,32 @@
+<!-- Login Page -->
+
+{% extends 'blogs/base.html' %}
+{% block content %}
+
+<!-- main container to keep style consistent -->
+<div class="main-container">
+    <h2>Login to FanVerse</h2>
+
+    <!-- error message if login details are incorrect -->
+    {% if error %}
+    <p class="warning-notice">{{ error }}</p>
+    {% endif %}
+
+    <!-- create form to send user log in data -->
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label>Username:</label>
+        <br>
+        <!-- input boxes for username and password -->
+        <input type="text" name="username" required
+            style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%;"><br><br>
+
+        <label>Password:</label>
+        <br>
+        <input type="password" name="password" required
+            style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%;"><br><br>
+
+        <button type="submit" class="button">Log In</button>
+    </form>
+</div>
+{% endblock %}
