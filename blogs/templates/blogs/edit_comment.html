@@ -1,0 +1,14 @@
+{% extends 'blogs/base.html' %}
+{% block content %}
+
+<div class="main-container">
+    <h2>Edit Comment</h2>
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="content" rows="4" style="width: 100%; border-radius: 8px; border: 1px solid midnightblue; padding: 8px;">{{ comment.content }}</textarea>
+        <br><br>
+        <button type="submit" class="button">Save changes</button>
+    </form>
+    <a href="{% url 'blog_detail' comment.blog.id %}">Cancel</a>
+</div>
+{% endblock %}

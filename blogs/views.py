@@ -4,9 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 
 
-# Create your views here.
-
-def index(request):
+def index(request): # request is an object Django creates every time someone visits a page (request.user, request.method, request.POST, request.path)
     # Grab all Blog objects from the database, newest first
     blogs = Blog.objects.all().order_by('-created_at')
     # Send the blogs to the HTML template to be displayed
@@ -27,7 +25,7 @@ def edit_blog(request, blog_id):
     # only the author can edit, and only if not orphaned
     # If someone tries to visit /blogs/name/edit/ but they're not the author, 
     # redirect them back to the blog page
-    if blog.is_orphaned or blog.author != request.user:
+    if not blog.can_edit(request.user):
         return redirect('blog_detail', blog_id=blog_id)
    
     # request.method tells us HOW the user got here
@@ -44,7 +42,7 @@ def edit_blog(request, blog_id):
         return redirect('blog_detail', blog_id=blog_id)
     
     # If GET request, just show the edit form with current data filled in
-    return render(request, 'blogs/edit.html', {'blog': blog})
+    return render(request, 'blogs/edit_blog.html', {'blog': blog})
 
 def orphan_blog(request, blog_id):
     # only allows POST requests so someone can't type in a URL to orphan a story
@@ -93,15 +91,15 @@ def add_comment(request, blog_id):
         # if the user is logged in, grab the content they submitted on the form
         if request.user.is_authenticated:
             content = request.POST.get('content')
-        
-        #create a new comment and save it to the database
-        Comment.objects.create(
-            #link it to the blog object
-            blog = blog,
-            author = request.user,
-            # save the text the user submitted
-            content = content
+            #create a new comment and save it to the database
+            Comment.objects.create(
+                #link it to the blog object
+                blog = blog,
+                author = request.user,
+                # save the text the user submitted
+                content = content
         )
+        
     # redirect browser to the blog page & show the new comment
     return redirect('blog_detail', blog_id=blog_id)
 
@@ -128,6 +126,16 @@ def orphan_comment(request, comment_id):
 
         return redirect('blog_detail', blog_id=comment.blog.id)
     return redirect('index')
+
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if not comment.can_edit(request.user):
+        return redirect('blog_detail', blog_id=comment.blog.id)
+    if request.method == 'POST':
+        comment.content = request.POST.get('content')
+        comment.save()
+        return redirect('blog_detail', blog_id=comment.blog.id)
+    return render(request, 'blogs/edit_comment.html', {'comment': comment})
 
 def login_user(request):
     if request.method == 'POST':

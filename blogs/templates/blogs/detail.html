@@ -89,6 +89,7 @@
         <!-- if the comment isn't orphaned and belongs to the user, display buttons-->
         {% if not comment.is_orphaned and comment.author == request.user %}
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed midnightblue;">
+            <a href="{% url 'edit_comment' comment.id %}" class="midnight-link" style="font-size: 14px; display: block; margin-bottom: 12px;">Edit Comment</a>
             <form method="post" action="{% url 'anonymize_comment' comment.id %}" style="display: inline-block;">
                 {% csrf_token %}
                 {% if comment.is_anonymous %}

@@ -18,6 +18,7 @@ urlpatterns = [
     path('<int:blog_id>/transfer/', views.transfer_blog, name='transfer_blog'),
     path('comment/<int:comment_id>/anonymize/', views.anonymize_comment, name='anonymize_comment'),
     path('comment/<int:comment_id>/orphan/', views.orphan_comment, name='orphan_comment'),
+    path('comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
     path('logout/', views.logout_user, name='logout'),
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
