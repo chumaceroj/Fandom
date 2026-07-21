@@ -22,6 +22,7 @@ urlpatterns = [
     path('comment/<int:comment_id>/edit/', views.edit_comment, name='edit_comment'),
     path('profile/<str:username>/', views.profile, name='profile'),
     path('profile/<str:username>/edit/', views.edit_profile, name='edit_profile'),
+    path('profile-settings/', views.profile_settings, name='profile_settings'),
     path('logout/', views.logout_user, name='logout'),
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),

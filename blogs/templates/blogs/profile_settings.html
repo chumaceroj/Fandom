@@ -1,0 +1,29 @@
+{% extends 'blogs/base.html' %}
+{% block content %}
+
+<div class="main-container">
+    <h1 style="color: midnightblue; margin-bottom: 24px;">Profile Settings</h1>
+
+    <div class="blog-card">
+        <h3 style="margin: 0 0 8px 0;">Edit Profile</h3>
+        <p style="margin-bottom: 12px; color: grey;">Update your bio and profile information.</p>
+        <a href="{% url 'edit_profile' request.user.username %}" class="button"
+            style="text-decoration: none; display: inline-block;">Edit Profile</a>
+    </div>
+
+    <div class="blog-card">
+        <h3 style="margin: 0 0 8px 0;">Change Username</h3>
+        <p style="margin-bottom: 12px; color: grey;">Update your username. You can choose to keep or update your name on existing posts.</p>
+        <a href="{% url 'change_username' %}" class="button"
+            style="text-decoration: none; display: inline-block;">Change Username</a>
+    </div>
+
+    <div class="blog-card" style="border-color: crimson; border-width: 2px;">
+        <h3 style="margin: 0 0 8px 0; color: crimson;">Delete Account</h3>
+        <p style="margin-bottom: 12px; color: grey;">Permanently delete your account. This cannot be undone.</p>
+        <a href="{% url 'delete_account' %}" class="button"
+            style="text-decoration: none; display: inline-block; border-color: crimson; color: crimson;">Delete Account</a>
+    </div>
+</div>
+
+{% endblock %}

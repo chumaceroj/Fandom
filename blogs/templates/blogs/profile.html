@@ -7,13 +7,13 @@
     <p style="margin-top: 8px;">{{ user_profile.biography }}</p>
     {% endif %}
     {% if profile_user == request.user %}
-    <a href="{% url 'create_blog' %}?from=profile" class="button"
-        style="margin-top: 12px; display: inline-block; text-decoration: none;">Create Post</a>
-    <a href="{% url 'edit_profile' profile_user.username %}?from=profile" class="button"
+    <a href="{% url 'create_blog' %}" class="button"
+        style="margin-top: 12px; display: inline-block; text-decoration: none;">Create Blog</a>
+    <a href="{% url 'edit_profile' profile_user.username %}" class="button"
         style="margin-top: 12px; display: inline-block; text-decoration: none;">Edit Profile</a>
-    <a href="{% url 'change_username' %}?from=profile" class="button"
+    <a href="{% url 'change_username' %}" class="button"
         style="margin-top: 12px; display: inline-block; text-decoration: none;">Change Username</a>
-    <a href="{% url 'delete_account' %}?from=profile" class="button"
+    <a href="{% url 'delete_account' %}" class="button"
         style="margin-top: 12px; display: inline-block; text-decoration: none; border-color: crimson; color: crimson;">Delete
         Account</a>
     {% endif %}
@@ -25,6 +25,10 @@
 </div>
 
 <div id="blogs-tab" class="tab-content" style="display: block;">
+    {% if profile_user == request.user %}
+    <a href="{% url 'create_blog' %}" class="button-large"
+        style="text-decoration: none; display: inline-block; margin-bottom: 24px;">Create Blog</a>
+    {% endif %}
     {% for blog in blogs %}
     <div class="blog-card">
         <h2>

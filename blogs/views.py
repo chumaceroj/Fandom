@@ -226,6 +226,11 @@ def register_user(request):
         return redirect('index')
     return render(request, 'blogs/register.html')
 
+def profile_settings(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    return render(request, 'blogs/profile_settings.html')
+
 def delete_account(request):
     if not request.user.is_authenticated:
         return redirect('login')
