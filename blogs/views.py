@@ -263,3 +263,10 @@ def change_username(request):
         
         return redirect('profile', username=new_username)
     return render(request, 'blogs/change_username.html')
+
+def post_settings(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    # verify user is author and blog isn't orphaned before rendering settings
+    if not blog.can_edit(request.user):
+        return redirect('blog_detail', blog_id=blog_id)
+    return render(request, 'blogs/post_settings.html', {'blog': blog})

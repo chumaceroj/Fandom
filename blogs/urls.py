@@ -28,4 +28,5 @@ urlpatterns = [
     path('login/', views.login_user, name='login'),
     path('delete-account/', views.delete_account, name='delete_account'),
     path('change-username/', views.change_username, name='change_username'),
+    path('<int:blog_id>/settings/', views.post_settings, name='post_settings'),
 ]

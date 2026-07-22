@@ -1,0 +1,59 @@
+{% extends 'blogs/base.html' %}
+{% block content %}
+
+<h1 style="color: midnightblue; margin-bottom: 24px;">Post Settings</h1>
+
+<div style="display: flex; flex-direction: column; gap: 24px;">
+
+    <div class="blog-card">
+        <h3 style="margin-top: 0; margin-bottom: 8px; color: midnightblue;">Go Anonymous</h3>
+        <p style="margin: 0 0 16px 0; color: midnightblue;">
+            Removes username from post. This action retains editing privileges and is reversible.
+        </p>
+        <form method="post" action="{% url 'anonymize_blog' blog.id %}">
+            {% csrf_token %}
+            {% if blog.is_anonymous %}
+            <button type="submit" class="button"
+                onclick="return confirm('Warning: Going anonymous hides your profile name from viewers. Do you want to continue?');">Reveal
+                Identity</button>
+            {% else %}
+            <button type="submit" class="button"
+                onclick="return confirm('Warning: Going anonymous hides your profile name from public viewers. Do you want to continue?');">Go
+                Anonymous</button>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="blog-card">
+        <h3 style="margin-top: 0; margin-bottom: 8px; color: midnightblue;">Transfer Post</h3>
+        <p style="margin: 0 0 16px 0; color: midnightblue;">
+            Transfer post to another user. This action transfers ownership to another user, thereby removing editing
+            privileges for the previous owner. This action is irreversible.
+        </p>
+        <form method="post" action="{% url 'transfer_blog' blog.id %}">
+            {% csrf_token %}
+            <input type="text" name="new_owner_username" placeholder="Enter username to transfer to"
+                style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%; max-width: 300px; margin-bottom: 12px; display: block;">
+            <button type="submit" class="button"
+                onclick="return confirm('Warning: Transferring ownership is permanent. You will lose ownership of this post. Do you want to continue?');">Transfer
+                Ownership</button>
+        </form>
+    </div>
+
+    <div class="blog-card" style="border-color: crimson; border-width: 2px;">
+        <h3 style="margin-top: 0; margin-bottom: 8px; color: crimson;">Orphan This Post</h3>
+        <p style="margin: 0 0 16px 0; color: midnightblue;">
+            Sever the link between a post and the author's profile. Permanately removes username, editing privileges,
+            and ownership of the post. This action is irreversible.
+        </p>
+        <form method="post" action="{% url 'orphan_blog' blog.id %}">
+            {% csrf_token %}
+            <button type="submit" class="button" style="border-color: crimson; color: crimson;"
+                onclick="return confirm('Warning: Orphaning is permanent. You will lose ownership forever. Do you want to continue?');">Orphan
+                Post</button>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

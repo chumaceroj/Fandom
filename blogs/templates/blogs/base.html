@@ -210,17 +210,43 @@
     </div>
 
     <div class="main-container">
-        <!-- if the user request came from the "My Profile" page, show this code -->
-        {% if request.GET.from == 'profile' %}
-        <div style="margin-bottom: 20px;">
-            <a href="{% url 'profile' user.username %}" class="midnight-link" style="font-size: 16px;">&larr;
-                Back to My Profile</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <!-- if the user request came from the "My Profile" page, show this back button -->
+                {% if request.GET.from == 'profile' %}
+                    <a href="{% url 'profile' user.username %}" class="midnight-link" style="font-size: 16px;">&larr; Back to My Profile</a>
+                {% elif request.GET.from == 'profile_settings' %}
+                    <a href="{% url 'profile_settings' %}" class="midnight-link" style="font-size: 16px;">&larr; Back to Profile Settings</a>
+
+                <!-- if the user request came from "Edit Blog" or "Post Settings", show this back button-->
+                {% elif request.resolver_match.url_name == 'edit_blog' or request.resolver_match.url_name == 'post_settings' %}
+                    {% if blog %}
+                        <a href="{% url 'blog_detail' blog.id %}" class="midnight-link" style="font-size: 16px;">&larr; Back to Post Details</a>
+                    {% else %}
+                        <a href="{% url 'index' %}" class="midnight-link" style="font-size: 16px;">&larr; Back to All Posts</a>
+                    {% endif %}
+                
+                {% elif request.resolver_match.url_name == 'change_username' or request.resolver_match.url_name == 'delete_account' or request.resolver_match.url_name == 'edit_profile' %}
+                    <a href="{% url 'profile_settings' %}" class="midnight-link" style="font-size: 16px;">&larr; Back to Profile Settings</a>
+                <!-- if the user request came from the "All Posts" page, show this back button -->
+                {% elif request.resolver_match.url_name != 'index' %}
+                    <a href="{% url 'index' %}" class="midnight-link" style="font-size: 16px;">&larr; Back to All Posts</a>
+                {% endif %}
+            </div>
+
+            <!-- if the user request came from the "All Posts" page, show this back button -->
+            {% if request.resolver_match.url_name == 'blog_detail' %}
+                {% if blog and not blog.is_orphaned %}
+                    {% if blog.author == request.user %}
+            <div>
+                <a href="{% url 'edit_blog' blog.id %}{% if request.GET.from %}?from={{ request.GET.from }}{% endif %}" class="button" style="text-decoration: none;">Edit Post</a>
+                <a href="{% url 'post_settings' blog.id %}{% if request.GET.from %}?from={{ request.GET.from }}{% endif %}" class="button" style="text-decoration: none;">Post Settings</a>
+            </div>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
         </div>
-        {% elif request.resolver_match.url_name != 'index' %}
-        <div style="margin-bottom: 20px;">
-            <a href="{% url 'index' %}" class="midnight-link" style="font-size: 16px;">&larr; Back to All Posts</a>
-        </div>
-        {% endif %}
+
         <!-- container for blogs (<div> can't perform actions/logic) -->
         {% block content %}
         {% endblock %}
