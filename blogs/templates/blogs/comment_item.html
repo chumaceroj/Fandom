@@ -1,0 +1,70 @@
+{% if comment.parent %}
+<div class="comment-card" style="margin-left: 24px; border-left: 3px solid midnightblue; margin-bottom: 16px; padding: 16px;">
+{% else %}
+<div class="comment-card" style="margin-left: 0px; border-left: 3px solid midnightblue; margin-bottom: 16px; padding: 16px;">
+{% endif %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-weight: bold; color: midnightblue;">
+    
+            {% if comment.author and not comment.is_anonymous and not comment.is_orphaned %}
+                <a href="{% url 'profile' comment.author.username %}" class="midnight-link" style="font-size: 14px;">{{ comment.get_display_author }}</a>
+            {% else %}
+                {{ comment.get_display_author }}
+            {% endif %}
+        </span>
+        <span style="font-size: 12px; color: gray;">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+    </div>
+
+    <p style="margin: 0 0 12px 0; color: midnightblue;">{{ comment.content }}</p>
+
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        
+        {% if request.user == comment.author and not comment.is_orphaned %}
+            
+            <form method="post" action="{% url 'anonymize_comment' comment.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="button" style="font-size: 12px; padding: 4px 8px;">
+                    {% if comment.is_anonymous %}Reveal Identity{% else %}Go Anonymous{% endif %}
+                </button>
+            </form>
+
+            <form method="post" action="{% url 'orphan_comment' comment.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="button" style="font-size: 12px; padding: 4px 8px; border-color: crimson; color: crimson;"
+                    onclick="return confirm('Orphan this comment permanently? You will lose ownership forever.');">
+                    Orphan
+                </button>
+            </form>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <button onclick="document.getElementById('reply-form-{{ comment.id }}').style.display = (document.getElementById('reply-form-{{ comment.id }}').style.display === 'none' ? 'block' : 'none');" 
+                    class="button" style="font-size: 12px; padding: 4px 8px;">
+                Reply
+            </button>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+        <div id="reply-form-{{ comment.id }}" style="display: none; margin-top: 12px;">
+            <form method="post" action="{% url 'add_comment' blog.id %}">
+                {% csrf_token %}
+                <!-- input box for comment replies -->
+                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                <textarea name="content" rows="2" placeholder="Write a reply..." required style="width: 100%; border-radius: 4px; border: 1px solid midnightblue; padding: 8px; margin-bottom: 8px; font-family: inherit;"></textarea>
+                <button type="submit" class="button" style="font-size: 12px; padding: 4px 12px;">Submit Reply</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <!-- check if comment has any children (replies) -->
+    {% if comment.replies.all %}
+        <div style="margin-top: 16px;">
+            <!-- loops through all children and adds them -->
+            {% for reply in comment.replies.all %}
+                {% include 'blogs/comment_item.html' with comment=reply %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

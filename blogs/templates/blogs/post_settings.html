@@ -1,6 +1,18 @@
 {% extends 'blogs/base.html' %}
 {% block content %}
 <h1 style="color: midnightblue; margin-bottom: 24px;">Post Settings</h1>
+
+<!-- checks for feedback messages (ex. successful transfer submission message)-->
+{% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            <div style="padding: 12px 16px; background-color: #e6f0fa; border: 1px solid midnightblue; border-radius: 8px; color: midnightblue; font-weight: bold; margin-bottom: 12px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <div style="display: flex; flex-direction: column; gap: 24px;">
     <div class="blog-card">
         <h3 style="margin-top: 0; margin-bottom: 8px; color: midnightblue;">Go Anonymous</h3>
@@ -95,6 +107,20 @@
         </form>
     </div>
     {% endif %}
+
+    <div class="blog-card">
+        <h3 style="margin-top: 0; margin-bottom: 8px; color: midnightblue;">Admin Mediated Transfer</h3>
+        <p style="margin: 0 0 16px 0; color: midnightblue;">
+            Request a transfer of ownership to another user mediated by a site administrator. Unlike direct transfer, ownership is not updated immediately. An administrator must review and approve your request before ownership is transferred.
+        </p>
+        <form method="post" action="{% url 'request_admin_transfer' blog.id %}">
+            {% csrf_token %}
+            <input type="text" name="target_user_identifier" placeholder="Enter username or email to transfer to"
+                style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%; max-width: 300px; margin-bottom: 12px; display: block;" required>
+            <button type="submit" class="button"
+                onclick="return confirm('Submit transfer request to admin for review?');">Request Transfer</button>
+        </form>
+    </div>
 
     <div class="blog-card" style="border-color: crimson; border-width: 2px;">
         <h3 style="margin-top: 0; margin-bottom: 8px; color: crimson;">Orphan This Post</h3>

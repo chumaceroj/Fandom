@@ -36,4 +36,5 @@ urlpatterns = [
     path('invitation/<int:invitation_id>/accept/', views.accept_invitation, name='accept_invitation'),
     path('invitation/<int:invitation_id>/decline/', views.decline_invitation, name='decline_invitation'),
     path('notifications/', views.notifications, name='notifications'),
+    path('blog/<int:blog_id>/request-transfer/', views.request_admin_transfer, name='request_admin_transfer'),
 ]

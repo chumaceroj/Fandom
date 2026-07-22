@@ -1,23 +1,23 @@
+Your friend cleaned up the author display to use get_display_author and added comment chaining with comment_item.html. We need to keep her comment system and merge in the collaborator names. Replace the entire file with:
+
+html
 <!-- Blog detail page (wtih comments) -->
 
 {% extends 'blogs/base.html' %}
 {% block content %}
 
-<!-- create blog container for single blog post -->
+<!-- container for the blog post -->
 <div class="blog-card">
-    <!-- display the blogs title, author, full text, and when it was created -->
     <h2>{{ blog.title }}</h2>
-    {% if blog.is_orphaned %}
-    <p>By: orphan_account</p>
-    {% elif blog.is_anonymous %}
-    <p>By: Anonymous</p>
-    {% elif not blog.author %}
-    <p>By: deleted_user</p>
-    {% elif blog.original_author_name %}
-    <p>By: {{ blog.original_author_name }}{% for collab in blog.collaborations.all %}{% if collab.role == 'collaborator' %}, <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>{% endif %}{% endfor %}</p>
+    
+    <!-- checks if the blog has an author (isn't anonymous or orphaned)-->
+    {% if blog.author and not blog.is_anonymous and not blog.is_orphaned %}
+    <!-- makes author name a clickable link leading to their profile -->
+        <p>By: <a href="{% url 'profile' blog.author.username %}" class="midnight-link" style="font-size: 16px;">{{ blog.get_display_author }}</a>{% for collab in blog.collaborations.all %}{% if collab.role == 'collaborator' %}, <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>{% endif %}{% endfor %}</p>
     {% else %}
-    <p>By: <a href="{% url 'profile' blog.author.username %}" class="midnight-link" style="font-size: 16px;">{{ blog.author.username }}</a>{% for collab in blog.collaborations.all %}{% if collab.role == 'collaborator' %}, <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>{% endif %}{% endfor %}</p>
+        <p>By: {{ blog.get_display_author }}</p>
     {% endif %}
+
     <p style="margin-top: 16px; font-size: 1.1em;">{{ blog.content }}</p>
     <p style="margin-top: 16px; color: grey;"><small>Posted: {{ blog.created_at }}</small></p>
 </div>
@@ -41,78 +41,33 @@
 
 <h3 style="color: midnightblue; margin-top: 32px;">Comments</h3>
 
-<!-- if the user is logged in, create a container for the comment (labelled "Add a Comment") -->
 {% if user.is_authenticated %}
-<div class="comment-card" style="margin-top: 24px;">
-    <h4 style="margin: 0 0 12px 0; color: midnightblue;">Add a Comment</h4>
-    <!-- create a form to send a post request with the new comment -->
-    <form method="post" action="{% url 'add_comment' blog.id %}">
-        {% csrf_token %}
-        <!-- input box for writing comment and submit button to send the form data -->
-        <textarea name="content" rows="4"
-            style="width: 100%; border-radius: 8px; border: 1px solid midnightblue; padding: 8px;"
-            placeholder="What do you think?..." required></textarea>
-        <br>
-        <br>
-        <button type="submit" class="button">Post Comment</button>
-    </form>
-</div>
-
-<!-- create a comment card for all the comments related to this post -->
-{% for comment in blog.comments.all %}
-<div class="comment-card">
-    <!-- include the authors name, the comment, and the date -->
-    {% if comment.is_orphaned %}
-    <p><strong>orphan_account</strong> said:</p>
-    {% elif comment.is_anonymous %}
-    <p><strong>Anonymous</strong> said:</p>
-    {% elif not comment.author %}
-    <p><strong>deleted_user</strong> said:</p>
-    {% elif comment.original_author_name %}
-    <p><strong>{{ comment.original_author_name }}</strong> said:</p>
-    {% else %}
-    <p><strong><a href="{% url 'profile' comment.author.username %}" class="midnight-link" style="font-size: 16px;">
-                {{ comment.author.username }}</a></strong> said:</p>
-    {% endif %}
-    <p>{{ comment.content }}</p>
-    <p><small>{{ comment.created_at }}</small></p>
-
-    <!-- if the comment isn't orphaned and belongs to the user, display buttons-->
-    {% if not comment.is_orphaned and comment.author == request.user %}
-    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed midnightblue;">
-        <a href="{% url 'edit_comment' comment.id %}" class="midnight-link"
-            style="font-size: 14px; display: block; margin-bottom: 12px;">Edit Comment</a>
-        <form method="post" action="{% url 'anonymize_comment' comment.id %}" style="display: inline-block;">
+    <!-- container for comment -->
+    <div class="comment-card" style="margin-top: 24px;">
+        <h4 style="margin: 0 0 12px 0; color: midnightblue;">Add a Comment</h4>
+        <!-- form submitting a post request -->
+        <form method="post" action="{% url 'add_comment' blog.id %}">
             {% csrf_token %}
-            {% if comment.is_anonymous %}
-            <button type="submit" class="button-large"
-                onclick="return confirm('Warning: Comment anonymity hides your profile name. Do you want to reveal your identity?');">Reveal
-                Comment Identity</button>
-            {% else %}
-            <button type="submit" class="button-large"
-                onclick="return confirm('Warning: Comment anonymity hides your profile name. Do you want to continue?');">Make
-                Comment Anonymous</button>
-            {% endif %}
-        </form>
-
-        <form method="post" action="{% url 'orphan_comment' comment.id %}"
-            style="display: inline-block; margin-left: 16px;">
-            {% csrf_token %}
-            <button type="submit" class="button-large"
-                onclick="return confirm('Warning: Comment orphaning is permanent. Do you want to continue?');">Orphan
-                Comment</button>
+            <!-- input box for comment contents -->
+            <textarea name="content" rows="4" style="width: 100%; border-radius: 8px; border: 1px solid midnightblue; padding: 8px;" placeholder="What do you think?..." required></textarea>
+            <br><br>
+            <button type="submit" class="button">Post Comment</button>
         </form>
     </div>
-    {% endif %}
-</div>
-<!-- if a blog has zero comments, display "No comments yet" -->
-{% empty %}
-<p style="color: midnightblue; font-style: italic;">No comments yet.</p>
-{% endfor %}
 
-<!-- if a user isn't logged in -->
+    <!-- looping through all comments on this blog -->
+    {% for comment in blog.comments.all %}
+        <!-- check to enture comment is top-level (no parent) -->
+        {% if not comment.parent %}
+            <!-- recursively includes comment_item.html to get all replies -->
+            {% include 'blogs/comment_item.html' with comment=comment %}
+        {% endif %}
+    {% empty %}
+        <!-- if blog has zero comments, dispaly "No comments yet." -->
+        <p style="color: midnightblue; font-style: italic;">No comments yet.</p>
+    {% endfor %}
 {% else %}
-<p style="font-style: italic; color: midnightblue;">Please log in to view or leave comments.</p>
+    <p style="font-style: italic; color: midnightblue;">Please log in to view or leave comments.</p>
 {% endif %}
 
 {% endblock %}
