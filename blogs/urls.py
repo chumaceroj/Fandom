@@ -29,4 +29,5 @@ urlpatterns = [
     path('delete-account/', views.delete_account, name='delete_account'),
     path('change-username/', views.change_username, name='change_username'),
     path('<int:blog_id>/settings/', views.post_settings, name='post_settings'),
+    path('blog/<int:blog_id>/request-transfer/', views.request_admin_transfer, name='request_admin_transfer'),
 ]

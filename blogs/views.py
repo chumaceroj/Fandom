@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Blog, Comment, Profile
+from .models import Blog, Comment, Profile, TransferRequest
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 def index(request): # request is an object Django creates every time someone visits a page (request.user, request.method, request.POST, request.path)
@@ -82,50 +84,55 @@ def transfer_blog(request, blog_id):
                 # Username doesn't exist — just redirect back
                 pass
     return redirect('blog_detail', blog_id=blog_id)
-            
+
+@login_required
 def add_comment(request, blog_id):
+    # get the specific blog post using its ID/return a 404 page if it doesn't exist
+    blog = get_object_or_404(Blog, id=blog_id)
     # if the user just submitted a post request
     if request.method == 'POST':
-        # get the specific blog post using its ID/return a 404 page if it doesn't exist
-        blog = get_object_or_404(Blog, id=blog_id)
-        # if the user is logged in, grab the content they submitted on the form
-        if request.user.is_authenticated:
-            content = request.POST.get('content')
+        content = request.POST.get('content', '').strip()
+        parent_id = request.POST.get('parent_id')
+        parent_comment = None
+
+        # if replying to a comment, get the parent
+        if parent_id:
+            parent_comment = get_object_or_404(Comment, id=parent_id)
+
+        if content:
             #create a new comment and save it to the database
             Comment.objects.create(
                 #link it to the blog object
                 blog = blog,
                 author = request.user,
+                parent = parent_comment,
                 # save the text the user submitted
                 content = content
         )
         
     # redirect browser to the blog page & show the new comment
-    return redirect('blog_detail', blog_id=blog_id)
+    return redirect('blog_detail', blog_id=blog.id)
 
+@login_required
 def anonymize_comment(request, comment_id):
-    if request.method == 'POST':
-        comment = get_object_or_404(Comment, id=comment_id)
+    comment = get_object_or_404(Comment, id=comment_id)
         
-        if comment.author == request.user:
-            if comment.is_anonymous:
-                comment.deanonymize()
-            else:
-                comment.anonymize()
+    if comment.can_edit(request.user):
+        if comment.is_anonymous:
+            comment.deanonymize()
+        else:
+            comment.anonymize()
         
-        return redirect('blog_detail', blog_id=comment.blog.id)
-    return redirect('index')
+    return redirect('blog_detail', blog_id=comment.blog.id)
 
-        
+@login_required     
 def orphan_comment(request, comment_id):
-    if request.method == 'POST':
-        comment = get_object_or_404(Comment, id=comment_id)
+    comment = get_object_or_404(Comment, id=comment_id)
         
-        if comment.author == request.user:
-            comment.orphan()
+    if comment.can_edit(request.user):
+        comment.orphan()
 
-        return redirect('blog_detail', blog_id=comment.blog.id)
-    return redirect('index')
+    return redirect('blog_detail', blog_id=comment.blog.id)
 
 def edit_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -270,3 +277,36 @@ def post_settings(request, blog_id):
     if not blog.can_edit(request.user):
         return redirect('blog_detail', blog_id=blog_id)
     return render(request, 'blogs/post_settings.html', {'blog': blog})
+
+# only logged-in users can access this view
+@login_required
+def request_admin_transfer(request, blog_id):
+    # save the blog ID (404 error if not found)
+    blog = get_object_or_404(Blog, id=blog_id)
+    
+    if blog.author != request.user:
+        # show error message if unauthorized
+        messages.error(request, "You do not have permission to transfer this post.")
+        # redirect back to blog details
+        return redirect('index')
+
+    if request.method == 'POST':
+        # save the target username entered in the form
+        target_identifier = request.POST.get('target_user_identifier', '').strip()
+        
+        if target_identifier:
+            # create/save a new TransferRequest in the database
+            TransferRequest.objects.create(
+                # attach the current blog
+                blog=blog,
+                # set the logged-in user as requester and save the requested target username
+                requester=request.user,
+                target_user_identifier=target_identifier
+            )
+            # show the success message to the user
+            messages.success(request, "Request has been submitted successfully. You will receive a response in approximately 48 hours.")
+        else:
+            # show an error message if the input field was blank
+            messages.error(request, "Please enter a valid username or email address.")
+
+    return redirect('post_settings', blog_id=blog.id)

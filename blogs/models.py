@@ -59,13 +59,15 @@ class Blog(models.Model): # creates the Blog class and creates a database table 
 
     
 class Comment(models.Model):
-    # Links comment to specific Blog post (one-way connection)
+    # links comment to specific Blog post (one-way connection)
     # "related_name" is a shortcut: allows us to grab all comments by looking at a Blog, using .comments
-    # Automatically deletes comments from deleted Blog
+    # automatically deletes comments from deleted Blog
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name = 'comments')
-    # Links comment to User
-    # If the User deletes their account, keep the comment (author = null)
+    # links comment to User
+    # if the User deletes their account, keep the comment (author = null)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    # link to parent comment for comment chaining
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_orphaned = models.BooleanField(default=False)
@@ -73,7 +75,7 @@ class Comment(models.Model):
     original_author_name = models.CharField(max_length=200, null=True, blank=True)
     
     def __str__(self):
-        return f"Comment by {self.get_display_author()} at {self.created_at} on {self.blog.title}"
+        return f"Comment by {self.author if not self.is_orphaned else 'Orphaned'} on {self.blog.title}"
     
     def orphan(self):
         self.author = None
@@ -108,4 +110,26 @@ class Comment(models.Model):
     
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    biography = models.CharField(max_length=150)                      
+    biography = models.CharField(max_length=150)    
+
+class TransferRequest(models.Model):
+    # links the blog post being transferred (deletes request if the blog is deleted)
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='transfer_requests')
+    # links the current owner requesting the transfer 
+    requester = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_transfer_requests')
+    # saves target username entered by the requester
+    target_user_identifier = models.CharField(max_length=150)
+    # tracking request categories
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending Admin Approval'),
+        ('APPROVED', 'Approved'),
+        ('DENIED', 'Denied'),
+    ]
+    # current status of the request (default is PENDING)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    # saves the time when the request was created
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # Return a human-readable summary string
+        return f"Transfer Request for '{self.blog.title}' to '{self.target_user_identifier}' ({self.status})"
