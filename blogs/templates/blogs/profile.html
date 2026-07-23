@@ -16,7 +16,7 @@
 <div id="blogs-tab" class="tab-content" style="display: block;">
     {% if profile_user == request.user %}
     <a href="{% url 'create_blog' %}" class="button-large"
-        style="text-decoration: none; display: inline-block; margin-bottom: 24px;">Create Blog</a>
+        style="text-decoration: none; display: inline-block; margin-bottom: 24px;">Create Post</a>
     {% endif %}
     {% for blog in blogs %}
     <div class="blog-card">
