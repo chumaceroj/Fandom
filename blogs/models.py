@@ -21,6 +21,7 @@ class Blog(models.Model): # creates the Blog class and creates a database table 
         self.author = None
         self.is_orphaned = True
         self.save() # saves the changes to the database, only needed when changing the database
+        self.collaborations.all().delete()
 
     def can_edit(self, user):
         """Checks if the blog can still be edited (cannot be orphaned and must be author or collaborator)"""

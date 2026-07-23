@@ -21,7 +21,7 @@
 
 <!-- if the logged in user is a collaborator (not owner), show collaborator options -->
 {% for collab in blog.collaborations.all %}
-{% if collab.user == request.user and collab.role == 'collaborator' %}
+{% if not blog.is_orphaned and collab.user == request.user and collab.role == 'collaborator' %}
 <div class="blog-card" style="border-style: dashed; margin-bottom: 32px;">
     <p style="margin: 0 0 8px 0;">
         <a href="{% url 'edit_blog' blog.id %}" class="midnight-link"
