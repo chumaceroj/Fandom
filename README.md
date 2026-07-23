@@ -60,6 +60,8 @@ Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
  
 ```
 Fandom/
+├── README.md
+├── LICENSE
 ├── fandomsite/
 │   ├── settings.py
 │   ├── urls.py
