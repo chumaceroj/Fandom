@@ -52,8 +52,16 @@ class Blog(models.Model): # creates the Blog class and creates a database table 
     def transfer(self, new_owner):
         """Transfer blog ownership to another user"""
         self.author = new_owner
+        self.original_author_name = None # prevents bugs with changing username
         self.save()
-        
+
+        # update/create owner role in Collaboration
+        Collaboration.objects.filter(blog=self, role='owner').delete()
+        Collaboration.objects.update_or_create(
+            blog=self, user=new_owner,
+            defaults={'role': 'owner'}
+        )
+
     def get_display_author(self):
         """Returns the name to display publicly"""
         if self.is_orphaned:
@@ -175,9 +183,20 @@ class TransferRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     # saves the time when the request was created
     created_at = models.DateTimeField(auto_now_add=True)
-    # tracks if requester has been notified/if they cleared the notification
-    is_notified = models.BooleanField(default=False)
+
+    # tracks notification dismissal for each user independently 
+    requester_notified = models.BooleanField(default=False)
+    target_notified = models.BooleanField(default=False)
 
     def __str__(self):
-        # Return a human-readable summary string
+        # return a human-readable summary string
         return f"Transfer Request for '{self.blog.title}' to '{self.target_user_identifier}' ({self.status})"
+
+    def save(self, *args, **kwargs):
+        # Automatically execute transfer whenever status is changed to APPROVED
+        if self.status == 'APPROVED':
+            new_owner = User.objects.filter(username=self.target_user_identifier).first() or \
+                        User.objects.filter(email=self.target_user_identifier).first()
+            if new_owner and self.blog.author != new_owner:
+                self.blog.transfer(new_owner)
+        super().save(*args, **kwargs)

@@ -1,4 +1,6 @@
 from .models import Invitation, TransferRequest
+# importing logical operators (or, and, not)
+from django.db.models import Q
 
 def notification_count(request):
     if request.user.is_authenticated:
@@ -8,13 +10,13 @@ def notification_count(request):
             status='pending'
         ).count()
 
-        # count completed transfer requests that haven't been dismissed
+        # grab all transfer requests that the logged-in user hasn't dismissed
         transfer_count = TransferRequest.objects.filter(
-            requester=request.user,
-            status__in=['APPROVED', 'DENIED'],
-            is_notified=False
+            (Q(requester=request.user, requester_notified=False) |
+             Q(target_user_identifier=request.user.username, target_notified=False)),
+            status__in=['APPROVED', 'DENIED']
         ).count()
 
         # return total unread notifications count
-        return {'notification_count': count}
+        return {'notification_count': count + transfer_count}
     return {'notification_count': 0}

@@ -33,10 +33,8 @@ class TransferRequestAdmin(admin.ModelAdmin):
                             User.objects.filter(email=transfer.target_user_identifier).first()
                 # if the user (to be transferred to) exists
                 if new_owner:
-                    # reassign post ownership to the new owner
-                    transfer.blog.author = new_owner
-                    # save the updated blog post
-                    transfer.blog.save()
+                    # user transfer method in model to handle ownership
+                    transfer.blog.transfer(new_owner)
                     # make the request status approved
                     transfer.status = 'APPROVED'
                     # save the transfer request record

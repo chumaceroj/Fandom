@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 
 
 def index(request): # request is an object Django creates every time someone visits a page (request.user, request.method, request.POST, request.path)
@@ -454,11 +455,11 @@ def notifications(request):
         status='pending'
     ).order_by('-created_at')
 
-    # all approved/denied transfer requests that haven't been dismissed
+    # all approved/denied transfer requests that haven't been dismissed by this user
     transfer_notifications = TransferRequest.objects.filter(
-        requester=request.user,
-        status__in=['APPROVED','DENIED'],
-        is_notified=False
+        (Q(requester=request.user, requester_notified=False) |
+         Q(target_user_identifier=request.user.username, target_notified=False)),
+        status__in=['APPROVED', 'DENIED']
     ).order_by('-created_at')
     
     return render(request, 'blogs/notifications.html', {
@@ -471,9 +472,17 @@ def notifications(request):
 def clear_transfer_notification(request, transfer_id):
     if request.method == 'POST':
         # get transfer request matching transfer_id & requester
-        transfer = get_object_or_404(TransferRequest, id=transfer_id, requester=request.user)
-        # mark as notified (so it disappears from notif page)
-        transfer.is_notified = True
+        transfer = get_object_or_404(
+            TransferRequest, 
+            Q(requester=request.user) | Q(target_user_identifier=request.user.username),
+            id=transfer_id,
+        )
+        # mark as dismissed only for whichever account clicked "Dismiss"
+        if transfer.requester == request.user:
+            transfer.requester_notified = True
+        if transfer.target_user_identifier == request.user.username:
+            transfer.target_notified = True
+        
         transfer.save()
     return redirect('notifications')
 
@@ -494,6 +503,23 @@ def request_admin_transfer(request, blog_id):
         target_identifier = request.POST.get('target_user_identifier', '').strip()
         
         if target_identifier:
+            # check if target user exists in FanVerse
+            user_exists = User.objects.filter(
+                Q(username=target_identifier) | Q(email=target_identifier)
+            ).exists()
+
+            if not user_exists:
+                messages.error(
+                    request,
+                    "The username you entered is not associated with a FanVerse acount. Please re-enter the username correctly."
+                )
+                return redirect('post_settings', blog_id=blog.id)
+
+            # prevent transferring to oneself
+            if target_identifier == request.user.username or target_identifier == request.user.email:
+                messages.error(request, "You cannot transfer a post to yourself.")
+                return redirect('post_settings', blog_id=blog.id)
+            
             # create/save a new TransferRequest in the database
             TransferRequest.objects.create(
                 # attach the current blog
@@ -506,6 +532,6 @@ def request_admin_transfer(request, blog_id):
             messages.success(request, "Request has been submitted successfully. You will receive a response in approximately 48 hours.")
         else:
             # show an error message if the input field was blank
-            messages.error(request, "Please enter a valid username or email address.")
+            messages.error(request, "Please enter a valid username.")
 
     return redirect('post_settings', blog_id=blog.id)

@@ -22,17 +22,20 @@
         </a>
     </h2>
     <!-- display author's name using function in models.py -->
-    {% if blog.is_orphaned %}
-    <p>By: orphan_account</p>
-    {% elif blog.is_anonymous %}
-    <p>By: Anonymous</p>
-    {% elif not blog.author %}
-    <p>By: deleted_user</p>
-    {% elif blog.original_author_name %}
-    <p>By: {{ blog.original_author_name }}{% for collab in blog.collaborations.all %}{% if collab.role == 'collaborator' %}, <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>{% endif %}{% endfor %}</p>
-    {% else %}
-    <p>By: <a href="{% url 'profile' blog.author.username %}" class="midnight-link" style="font-size: 16px;">{{blog.author.username }}</a>{% for collab in blog.collaborations.all %}{% if collab.role == 'collaborator' %}, <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>{% endif %}{% endfor %}</p>
-    {% endif %}
+    <p>By: 
+        {% if blog.is_orphaned or blog.is_anonymous or not blog.author %}
+            {{ blog.get_display_author }}
+        {% else %}
+            <a href="{% url 'profile' blog.author.username %}" class="midnight-link" style="font-size: 16px;">
+                {{ blog.get_display_author }}
+            </a>
+        {% endif %}
+        {% for collab in blog.collaborations.all %}
+            {% if collab.role == 'collaborator' %}
+                , <a href="{% url 'profile' collab.user.username %}" class="midnight-link" style="font-size: 16px;">{{ collab.user.username }}</a>
+            {% endif %}
+        {% endfor %}
+    </p>
     <!-- display preview of blog content (first 50 words) -->
     <p>{{ blog.content|truncatewords:50 }}</p>
 

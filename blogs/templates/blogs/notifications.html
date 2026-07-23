@@ -10,7 +10,7 @@
             <!-- display approval message if status is APPROVED -->
             <p><strong>Admin Transfer Approved:</strong> Ownership of 
                 <a href="{% url 'blog_detail' transfer.blog.id %}" class="midnight-link" style="font-size: 16px;">{{ transfer.blog.title }}</a> 
-                has been successfully transferred to <strong>{{ transfer.target_user_identifier }}</strong>.
+                has been successfully transferred from <strong>{{ transfer.requester.username }}</strong> to <strong>{{ transfer.target_user_identifier }}</strong>.
             </p>
             <p><small style="color: grey;">{{ transfer.created_at }}</small></p>
             
@@ -25,9 +25,9 @@
     {% else %}
         <div class="blog-card" style="border-left: 4px solid crimson;">
             <!-- denial message if status is DENIED -->
-            <p><strong>Admin Transfer Denied:</strong> Your request to transfer 
+            <p><strong>Admin Transfer Denied:</strong> The request to transfer 
                 <a href="{% url 'blog_detail' transfer.blog.id %}" class="midnight-link" style="font-size: 16px;">{{ transfer.blog.title }}</a> 
-                to <strong>{{ transfer.target_user_identifier }}</strong> was denied by an administrator.
+                from <strong>{{ transfer.requester.username }}</strong> to <strong>{{ transfer.target_user_identifier }}</strong> was denied by an administrator.
             </p>
             <p><small style="color: grey;">{{ transfer.created_at }}</small></p>
 
