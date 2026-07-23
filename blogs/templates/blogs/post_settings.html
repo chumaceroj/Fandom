@@ -115,7 +115,7 @@
         </p>
         <form method="post" action="{% url 'request_admin_transfer' blog.id %}">
             {% csrf_token %}
-            <input type="text" name="target_user_identifier" placeholder="Enter username or email to transfer to"
+            <input type="text" name="target_user_identifier" placeholder="Enter username to transfer to"
                 style="padding: 8px; border-radius: 4px; border: 1px solid midnightblue; width: 50%; max-width: 300px; margin-bottom: 12px; display: block;" required>
             <button type="submit" class="button"
                 onclick="return confirm('Submit transfer request to admin for review?');">Request Transfer</button>
